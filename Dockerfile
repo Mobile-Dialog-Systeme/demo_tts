@@ -1,10 +1,8 @@
 FROM ros:iron-ros-base
 
-# Arguments for user configuration
 ARG USERNAME=rosdev
 ARG UID=1000
 ARG GID=1000
-
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update -qq && \
@@ -32,3 +30,18 @@ RUN apt-get update -qq && \
   libhdf5-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+COPY pulse-client.conf /etc/pulse/client.conf
+
+COPY requirements.txt /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && \
+    rm /tmp/requirements.txt
+
+COPY start_tts.sh /start_tts.sh
+RUN chmod +x /start_tts.sh
+
+
+WORKDIR /home/${USERNAME}/ros2_ws/
+COPY src /home/${USERNAME}/ros2_ws/src
+
+CMD ["bash"]
