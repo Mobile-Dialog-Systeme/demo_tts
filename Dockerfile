@@ -31,14 +31,21 @@ RUN apt-get update -qq && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+  RUN ln -sf /usr/bin/python3 /usr/bin/python && \
+      ln -sf /usr/bin/pip3 /usr/bin/pip
+
 COPY pulse-client.conf /etc/pulse/client.conf
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && \
+
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
 COPY start_tts.sh /start_tts.sh
 RUN chmod +x /start_tts.sh
+
+ENV TTS_MODEL_NAME="tts_models/de/thorsten/tacotron2-DDC"
+RUN python -c "from TTS.api import TTS;TTS(model_name='${TTS_MODEL_NAME}')"
 
 
 WORKDIR /home/${USERNAME}/ros2_ws/
